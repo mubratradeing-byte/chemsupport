@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mubra AI 8.v1 - Sri Lankan A/L Chemistry Expert</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Lato:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- KaTeX for Chemistry Formulas -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css">
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/contrib/auto-render.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --navy-primary: #001F3F;
+            --navy-light: #003366;
+            --navy-dark: #001a2e;
+            --gold-primary: #D4AF37;
+            --gold-light: #E8C547;
+            --gold-dark: #AA8C2A;
+            --white: #FFFFFF;
+            --text-dark: #1a1a1a;
+            --bg-light: #f8f8f8;
+            --border-gold: rgba(212, 175, 55, 0.3);
+            --shadow-gold: rgba(212, 175, 55, 0.15);
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'Lato', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+        }
+
+        body {
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* ========== SIDEBAR ========== */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, var(--navy-primary) 0%, var(--navy-light) 100%);
+            padding: 2rem 1.5rem;
+            overflow-y: auto;
+            border-right: 3px solid var(--gold-primary);
+            box-shadow: inset 0 2px 20px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-logo {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--gold-primary);
+        }
+
+        .sidebar-logo h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            color: var(--gold-primary);
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-logo p {
+            color: var(--gold-light);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 500;
+        }
+
+        .sidebar-section {
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-section h3 {
+            color: var(--gold-primary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            font-family: 'Lato', sans-serif;
+        }
+
+        .sidebar-item {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--white);
+            font-size: 0.9rem;
+            border-left: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+
+        .sidebar-item:hover {
+            background-color: var(--navy-dark);
+            border-left-color: var(--gold-primary);
+            padding-left: 1.2rem;
+            color: var(--gold-light);
+        }
+
+        .sidebar-item.active {
+            background-color: rgba(212, 175, 55, 0.15);
+            border-left-color: var(--gold-primary);
+            color: var(--gold-primary);
+            font-weight: 600;
+        }
+
+        .sidebar-item span {
+            font-size: 1.1rem;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-gold);
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--gold-light);
+            opacity: 0.8;
+        }
+
+        /* ========== MAIN CONTENT ========== */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, var(--bg-light) 0%, #f0f0f0 100%);
+        }
+
+        /* ========== HEADER ========== */
+        .header {
+            background: linear-gradient(90deg, var(--navy-primary) 0%, var(--navy-light) 100%);
+            padding: 1.5rem 2rem;
+            border-bottom: 3px solid var(--gold-primary);
+            box-shadow: 0 4px 15px var(--shadow-gold);
+        }
+
+        .header h2 {
+            font-family: 'Cormorant Garamond', serif;
+            color: var(--gold-primary);
+            font-size: 1.8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 0.3rem;
+        }
+
+        .header p {
+            color: var(--gold-light);
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        /* ========== CHAT CONTAINER ========== */
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            scroll-behavior: smooth;
+        }
+
+        .chat-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-container::-webkit-scrollbar-thumb {
+            background: var(--gold-primary);
+            border-radius: 10px;
+            opacity: 0.6;
+        }
+
+        /* ========== CHAT MESSAGES ========== */
+        .message {
+            display: flex;
+            gap: 1rem;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 1rem 1.3rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .message-bubble.user-msg {
+            background: linear-gradient(135deg, var(--navy-primary) 0%, var(--navy-light) 100%);
+            color: var(--white);
+            border: 1px solid var(--navy-light);
+            box-shadow: 0 4px 12px rgba(0, 31, 63, 0.2);
+        }
+
+        .message-bubble.ai-msg {
+            background: var(--white);
+            color: var(--text-dark);
+            border: 2px solid var(--gold-primary);
+            box-shadow: 0 4px 15px var(--shadow-gold);
+            position: relative;
+        }
+
+        .message-bubble.ai-msg::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 15px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 0 solid transparent;
+            border-bottom: 8px solid var(--white);
+            filter: drop-shadow(0 -2px 0 var(--gold-primary));
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, var(--navy-primary), var(--navy-light));
+            color: var(--gold-primary);
+        }
+
+        .message.ai .message-avatar {
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+            color: var(--navy-primary);
+        }
+
+        /* ========== TYPING INDICATOR ========== */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 0.5rem 0;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--gold-primary);
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                opacity: 0.3;
+                transform: translateY(0);
+            }
+            30% {
+                opacity: 1;
+                transform: translateY(-10px);
+            }
+        }
+
+        /* ========== INPUT AREA ========== */
+        .input-area {
+            padding: 1.5rem 2rem;
+            background: var(--white);
+            border-top: 2px solid var(--gold-primary);
+            box-shadow: 0 -4px 15px var(--shadow-gold);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        #userInput {
+            flex: 1;
+            padding: 0.9rem 1.2rem;
+            border: 2px solid var(--navy-primary);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: 'Lato', sans-serif;
+            transition: all 0.3s ease;
+            resize: none;
+            min-height: 44px;
+            max-height: 120px;
+            color: var(--text-dark);
+        }
+
+        #userInput:focus {
+            outline: none;
+            border-color: var(--gold-primary);
+            box-shadow: 0 0 0 3px var(--shadow-gold);
+            background-color: #fafafa;
+        }
+
+        #userInput::placeholder {
+            color: #999;
+        }
+
+        .send-btn {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            color: var(--navy-primary);
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px var(--shadow-gold);
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px var(--shadow-gold);
+            background: linear-gradient(135deg, var(--gold-light), var(--gold-primary));
+        }
+
+        .send-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* ========== WELCOME STATE ========== */
+        .welcome-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .welcome-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            color: var(--navy-primary);
+            margin-bottom: 1rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.2rem;
+            color: var(--gold-primary);
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .welcome-text {
+            color: #666;
+            max-width: 500px;
+            margin-bottom: 2rem;
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+
+        .welcome-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 2rem;
+        }
+
+        .feature-box {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 2px solid var(--border-gold);
+            transition: all 0.3s ease;
+        }
+
+        .feature-box:hover {
+            border-color: var(--gold-primary);
+            box-shadow: 0 4px 12px var(--shadow-gold);
+            transform: translateY(-4px);
+        }
+
+        .feature-icon {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-name {
+            color: var(--navy-primary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ========== KaTeX STYLING ========== */
+        .katex {
+            font-size: 1em;
+            color: var(--navy-primary);
+        }
+
+        .katex-html {
+            display: inline;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 240px;
+                padding: 1.5rem 1rem;
+            }
+
+            .message-bubble {
+                max-width: 80%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-height: 200px;
+                border-right: none;
+                border-bottom: 3px solid var(--gold-primary);
+                padding: 1.2rem 1rem;
+                flex-direction: row;
+                overflow-x: auto;
+                overflow-y: hidden;
+            }
+
+            .sidebar-logo {
+                margin-bottom: 0;
+                padding-bottom: 0;
+                border-bottom: none;
+                margin-right: 2rem;
+                white-space: nowrap;
+            }
+
+            .sidebar-logo h1 {
+                font-size: 1.3rem;
+            }
+
+            .sidebar-logo p {
+                font-size: 0.65rem;
+            }
+
+            .sidebar-section {
+                margin-bottom: 0;
+                margin-right: 2rem;
+                white-space: nowrap;
+                display: flex;
+                flex-direction: column;
+                gap: 0.3rem;
+            }
+
+            .sidebar-section h3 {
+                margin-bottom: 0.5rem;
+            }
+
+            .sidebar-footer {
+                display: none;
+            }
+
+            .header {
+                padding: 1rem 1.5rem;
+            }
+
+            .header h2 {
+                font-size: 1.4rem;
+            }
+
+            .chat-container {
+                padding: 1.5rem;
+                gap: 0.8rem;
+            }
+
+            .message-bubble {
+                max-width: 85%;
+            }
+
+            .input-area {
+                padding: 1rem 1.5rem;
+            }
+
+            .welcome-title {
+                font-size: 1.8rem;
+            }
+
+            .welcome-subtitle {
+                font-size: 1rem;
+            }
+
+            .welcome-features {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                max-height: 150px;
+                padding: 0.8rem;
+            }
+
+            .sidebar-logo h1 {
+                font-size: 1.1rem;
+            }
+
+            .sidebar-section {
+                margin-right: 1rem;
+            }
+
+            .sidebar-item {
+                font-size: 0.8rem;
+                padding: 0.5rem 0.75rem;
+            }
+
+            .chat-container {
+                padding: 1rem;
+            }
+
+            .message-bubble {
+                max-width: 90%;
+                padding: 0.8rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .input-area {
+                padding: 0.8rem 1rem;
+            }
+
+            .input-wrapper {
+                gap: 0.5rem;
+            }
+
+            .send-btn {
+                width: 40px;
+                height: 40px;
+            }
+
+            .welcome-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <h1>Mubra AI</h1>
+            <p>8.v1</p>
+        </div>
+
+        <div class="sidebar-section">
+            <h3>📚 පාඩම්</h3>
+            <div class="sidebar-item active" data-lesson="organic">
+                <span>⚛️</span> Organic Chemistry
+            </div>
+            <div class="sidebar-item" data-lesson="inorganic">
+                <span>🔬</span> Inorganic Chemistry
+            </div>
+            <div class="sidebar-item" data-lesson="physical">
+                <span>📊</span> Physical Chemistry
+            </div>
+        </div>
+
+        <div class="sidebar-section">
+            <h3>📋 Past Papers</h3>
+            <div id="yearsContainer" style="max-height: 300px; overflow-y: auto;"></div>
+        </div>
+
+        <div class="sidebar-footer">
+            <p>Engineered for Excellence<br/>Sri Lankan A/L Chemistry</p>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <h2 id="currentTopic">Welcome to Mubra AI Chemistry</h2>
+            <p id="currentTopicSubtitle">Your Premium G.C.E. A/L Chemistry Expert</p>
+        </header>
+
+        <!-- Chat Container -->
+        <div class="chat-container" id="chatContainer">
+            <div class="welcome-container">
+                <div class="welcome-title">Welcome</div>
+                <div class="welcome-subtitle">Your AI Chemistry Tutor</div>
+                <div class="welcome-text">
+                    I'm Mubra AI 8.v1, your dedicated chemistry expert specializing in the G.C.E. A/L syllabus. 
+                    Ask me anything about Organic, Inorganic, or Physical Chemistry—from past papers (1985-2025) 
+                    to complex mechanisms and calculations.
+                </div>
+                <div class="welcome-features">
+                    <div class="feature-box">
+                        <div class="feature-icon">⚛️</div>
+                        <div class="feature-name">Organic</div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="feature-icon">🔬</div>
+                        <div class="feature-name">Inorganic</div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-name">Physical</div>
+                    </div>
+                    <div class="feature-box">
+                        <div class="feature-icon">📝</div>
+                        <div class="feature-name">Past Papers</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area">
+            <div class="input-wrapper">
+                <textarea 
+                    id="userInput" 
+                    placeholder="Ask about chemical reactions, mechanisms, calculations, or past papers..."
+                    rows="1"
+                ></textarea>
+                <button class="send-btn" id="sendBtn" title="Send message">📤</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ========== CONFIGURATION ==========
+        const CONFIG = {
+            // Replace with your actual Gemini API key
+            GEMINI_API_KEY: 'YOUR_GEMINI_API_KEY_HERE',
+            GEMINI_MODEL: 'gemini-1.5-flash',
+            GEMINI_API_URL: 'https://generativelanguage.googleapis.com/v1beta/models'
+        };
+
+        // ========== SYSTEM INSTRUCTION FOR MUBRA AI ==========
+        const SYSTEM_INSTRUCTION = `ඔබ "Mubra AI 8.v1" නම් විසිඳුම්ශීලී ශ්‍රී ලංකා රසායන විද්‍යා ගුරුවරයි.
+
+සිංහල භාෂාවෙන් පිළිතුරු දෙන ඔබ GCE A/L රසායන විද්‍යා විෂයට ගැඹුරු දැනුම සහිතයි.
+
+ඔබගේ විශේෂ දැනුම ක්ෂේත්‍ර:
+1. জৈவ රසායන - අංගසంයුතිවල ක්‍රියාවලිවලට සম්පූර්ණ ස්තර-දි 説明, යාන්ත්‍ර විද්‍යා සහ සমස්ත වර්ණන
+2. අජৈවික රසායන - ලවණ, ලෝහ සහ ඔවුන්ගේ ගුණ පිළිබඳ උගුණ විසඳුම්
+3. භෞතික රසායන - තාප ගතිකත්වය, සමතුලිතობ, ගතිකත්වය සහ ගණිතමය ගණනය කිරීම්
+
+ඔබ:
+- 1985 සිට 2025 දක්වා අතීතයේ කඩදාසි පිළිබඳ ප්‍රශ්න අනුව සිංහල පිළිතුරු දෙන්න
+- ස්තර-දි ස්තරවලින් 説明එකීපණ කරන්න, විශේෂයෙන් ජ෈වික යාන්ත්‍ර සහ ගණනය කිරීම් සඳහා
+- කෙතෙක් හැකි සීමාවලට ගිය විට අයිතිවෙතින ඔබ නිවැරදි වන්නේ නැත්තේ ඔබ ෙউපකල්ඩිතයි
+- ගණිතමය සූත්‍ර සඳහා KaTeX ංකේතන භාවිතා කරන්න (eg. $H_2SO_4$, $K_p$, $\\Delta H°$)
+- සකස් සිටින සිසුන්ගේ පෙනුම සඳහා අධිනිර්ණයලට සපයා දෙන්න
+
+සිංහල ගතිකි, දීර්ඝ පිළිතුරු සෙවන්න සිසුන් නිරීක්ෂණ ශිල්පී ප්‍රශ්නා ලිපිනම්කරණ කිරීමට දැරි පිළිතුරු දෙන්න.`;
+
+        // ========== DOM ELEMENTS ==========
+        const chatContainer = document.getElementById('chatContainer');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const yearsContainer = document.getElementById('yearsContainer');
+        const currentTopic = document.getElementById('currentTopic');
+        const currentTopicSubtitle = document.getElementById('currentTopicSubtitle');
+
+        // ========== STATE MANAGEMENT ==========
+        let currentLesson = 'organic';
+        let currentYear = null;
+        let isLoading = false;
+        let conversationHistory = [];
+
+        // ========== INITIALIZE ==========
+        function init() {
+            populateYears();
+            attachEventListeners();
+            renderWelcome();
+        }
+
+        // ========== POPULATE PAST PAPERS YEARS ==========
+        function populateYears() {
+            const years = [];
+            for (let year = 2025; year >= 1985; year--) {
+                years.push(year);
+            }
+
+            yearsContainer.innerHTML = years.map(year => 
+                `<div class="sidebar-item" data-year="${year}">
+                    <span>📄</span> ${year}
+                </div>`
+            ).join('');
+
+            // Add click handlers
+            document.querySelectorAll('[data-year]').forEach(el => {
+                el.addEventListener('click', () => selectYear(parseInt(el.dataset.year)));
+            });
+        }
+
+        // ========== SELECT LESSON ==========
+        function selectLesson(lesson) {
+            currentLesson = lesson;
+            currentYear = null;
+            
+            document.querySelectorAll('[data-lesson]').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelector(`[data-lesson="${lesson}"]`).classList.add('active');
+
+            const lessonNames = {
+                organic: '⚛️ Organic Chemistry - Mechanisms & Synthesis',
+                inorganic: '🔬 Inorganic Chemistry - Properties & Reactions',
+                physical: '📊 Physical Chemistry - Calculations & Equilibrium'
+            };
+
+            currentTopic.textContent = lessonNames[lesson];
+            currentTopicSubtitle.textContent = 'Ask me anything about ' + lesson.charAt(0).toUpperCase() + lesson.slice(1) + ' chemistry';
+            
+            renderWelcome();
+        }
+
+        // ========== SELECT YEAR (PAST PAPER) ==========
+        function selectYear(year) {
+            currentYear = year;
+            currentLesson = null;
+
+            document.querySelectorAll('[data-year]').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelector(`[data-year="${year}"]`).classList.add('active');
+
+            currentTopic.textContent = `📋 GCE A/L Chemistry ${year}`;
+            currentTopicSubtitle.textContent = `Past paper questions and solutions from ${year}`;
+            
+            renderWelcome();
+        }
+
+        // ========== RENDER WELCOME ==========
+        function renderWelcome() {
+            chatContainer.innerHTML = `
+                <div class="welcome-container">
+                    <div class="welcome-title">Ready to Learn</div>
+                    <div class="welcome-subtitle">${currentYear ? `Paper ${currentYear}` : currentLesson.charAt(0).toUpperCase() + currentLesson.slice(1)}</div>
+                    <div class="welcome-text">
+                        Ask me detailed questions and I'll provide comprehensive step-by-step explanations, 
+                        mechanisms, calculations, and insights from past papers.
+                    </div>
+                    <div class="welcome-features">
+                        <div class="feature-box">
+                            <div class="feature-icon">🧪</div>
+                            <div class="feature-name">Mechanisms</div>
+                        </div>
+                        <div class="feature-box">
+                            <div class="feature-icon">🔢</div>
+                            <div class="feature-name">Calculations</div>
+                        </div>
+                        <div class="feature-box">
+                            <div class="feature-icon">💡</div>
+                            <div class="feature-name">Solutions</div>
+                        </div>
+                        <div class="feature-box">
+                            <div class="feature-icon">✍️</div>
+                            <div class="feature-name">Explanations</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ========== ATTACH EVENT LISTENERS ==========
+        function attachEventListeners() {
+            // Lesson selection
+            document.querySelectorAll('[data-lesson]').forEach(el => {
+                el.addEventListener('click', () => selectLesson(el.dataset.lesson));
+            });
+
+            // Send button
+            sendBtn.addEventListener('click', sendMessage);
+
+            // Input enter key
+            userInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            // Auto-resize textarea
+            userInput.addEventListener('input', () => {
+                userInput.style.height = 'auto';
+                userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
+            });
+        }
+
+        // ========== SEND MESSAGE ==========
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message || isLoading) return;
+
+            // Clear input
+            userInput.value = '';
+            userInput.style.height = 'auto';
+
+            // Remove welcome if first message
+            if (conversationHistory.length === 0) {
+                chatContainer.innerHTML = '';
+            }
+
+            // Add user message
+            addMessage(message, 'user');
+
+            // Check API key
+            if (CONFIG.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+                addMessage(
+                    'දෙවිසිහ: API ඔබ Gemini API ඉතිරි කර තිබුණේ නැත්තේ. කරුණාකර CONFIG වස්තුවෙහි ඔබේ API කිරුණු ඉතිරි කරන්න.',
+                    'ai'
+                );
+                return;
+            }
+
+            // Show typing indicator
+            isLoading = true;
+            addTypingIndicator();
+
+            try {
+                // Build context
+                let context = `කරුණාකර මතක තබා ගන්න: ශිෂ්‍ය වර්තමාන ${currentYear ? `${currentYear}` : currentLesson} ගිණුම් වෙතින් අසයි.`;
+                
+                // Call Gemini API
+                const response = await callGeminiAPI(message, context);
+                
+                // Remove typing indicator
+                removeTypingIndicator();
+                
+                // Add AI response
+                addMessage(response, 'ai');
+            } catch (error) {
+                removeTypingIndicator();
+                addMessage(
+                    `දෙවිසිහ: API ආරම්භ හෝ ඔබ පිනිසෙ තිබුණේ අසහිතයි. පිනිසෙ: ${error.message}`,
+                    'ai'
+                );
+                console.error('API Error:', error);
+            } finally {
+                isLoading = false;
+                sendBtn.disabled = false;
+            }
+        }
+
+        // ========== CALL GEMINI API ==========
+        async function callGeminiAPI(userMessage, context) {
+            // Build messages for API
+            const messages = [
+                ...conversationHistory,
+                { role: 'user', content: `${context}\n\n${userMessage}` }
+            ];
+
+            const requestBody = {
+                system: SYSTEM_INSTRUCTION,
+                contents: messages.map(msg => ({
+                    role: msg.role === 'user' ? 'user' : 'model',
+                    parts: [{ text: msg.content }]
+                }))
+            };
+
+            const response = await fetch(
+                `${CONFIG.GEMINI_API_URL}/${CONFIG.GEMINI_MODEL}:generateContent?key=${CONFIG.GEMINI_API_KEY}`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                }
+            );
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error?.message || 'API request failed');
+            }
+
+            const data = await response.json();
+            const aiMessage = data.candidates[0].content.parts[0].text;
+
+            // Update conversation history
+            conversationHistory.push(
+                { role: 'user', content: userMessage },
+                { role: 'assistant', content: aiMessage }
+            );
+
+            return aiMessage;
+        }
+
+        // ========== ADD MESSAGE TO CHAT ==========
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender === 'user' ? 'user' : 'ai'}`;
+
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = 'message-avatar';
+            avatarDiv.textContent = sender === 'user' ? '👤' : '🧑‍🔬';
+
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = `message-bubble ${sender === 'user' ? 'user-msg' : 'ai-msg'}`;
+            bubbleDiv.innerHTML = text;
+
+            if (sender === 'user') {
+                messageDiv.appendChild(bubbleDiv);
+                messageDiv.appendChild(avatarDiv);
+            } else {
+                messageDiv.appendChild(avatarDiv);
+                messageDiv.appendChild(bubbleDiv);
+            }
+
+            chatContainer.appendChild(messageDiv);
+
+            // Render KaTeX
+            if (sender === 'ai') {
+                renderMathInElement(bubbleDiv, {
+                    delimiters: [
+                        { left: '$$', right: '$$', display: true },
+                        { left: '$', right: '$', display: false }
+                    ]
+                });
+            }
+
+            // Scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // ========== TYPING INDICATOR ==========
+        function addTypingIndicator() {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ai';
+            messageDiv.id = 'typingIndicator';
+
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = 'message-avatar';
+            avatarDiv.textContent = '🧑‍🔬';
+
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'message-bubble ai-msg';
+            bubbleDiv.innerHTML = `
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+
+            messageDiv.appendChild(avatarDiv);
+            messageDiv.appendChild(bubbleDiv);
+            chatContainer.appendChild(messageDiv);
+
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) indicator.remove();
+        }
+
+        // ========== INITIALIZE ON LOAD ==========
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
