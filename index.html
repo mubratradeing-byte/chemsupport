@@ -691,9 +691,16 @@
 
     <script>
         // ========== CONFIGURATION ==========
+        // 🔐 SECURITY INSTRUCTIONS:
+        // 1. Get your FREE API key: https://aistudio.google.com
+        // 2. Click "Get API key" → "Create API key in new project"
+        // 3. Copy your key (keep it PRIVATE - never share!)
+        // 4. Replace 'PASTE_YOUR_API_KEY_HERE' with your actual key
+        // 5. Save and test in browser
+        // ⚠️  NEVER commit this file with your API key to public GitHub!
+        
         const CONFIG = {
-            // Replace with your actual Gemini API key
-            GEMINI_API_KEY: 'YOUR_GEMINI_API_KEY_HERE',
+            GEMINI_API_KEY: 'PASTE_YOUR_API_KEY_HERE', // ← Users add their own key here
             GEMINI_MODEL: 'gemini-1.5-flash',
             GEMINI_API_URL: 'https://generativelanguage.googleapis.com/v1beta/models'
         };
@@ -870,9 +877,9 @@
             addMessage(message, 'user');
 
             // Check API key
-            if (CONFIG.GEMINI_API_KEY === 'AIzaSyAS8fVZZFMXE0PIq5DxUe3VyhXMiE4FrB4') {
+            if (CONFIG.GEMINI_API_KEY === 'AIzaSyAZ8SRcSLLEwY-Ubsgh5nC2oQA7CJRNRa4') {
                 addMessage(
-                    'දෙවිසිහ: API ඔබ Gemini API ඉතිරි කර තිබුණේ නැත්තේ. කරුණාකර CONFIG වස්තුවෙහි ඔබේ API කිරුණු ඉතිරි කරන්න.',
+                    '⚠️ API Key missing! Please follow these steps:\n\n1. Visit: https://aistudio.google.com\n2. Click "Get API key"\n3. Select "Create API key in new project"\n4. Copy your API key\n5. Open mubra-chemistry-app.html in text editor\n6. Find: GEMINI_API_KEY: "PASTE_YOUR_API_KEY_HERE"\n7. Replace with your actual key\n8. Save and reload this page\n\nWatch tutorial in API-KEY-SAFE-GUIDE.md!',
                     'ai'
                 );
                 return;
@@ -909,18 +916,33 @@
 
         // ========== CALL GEMINI API ==========
         async function callGeminiAPI(userMessage, context) {
-            // Build messages for API
-            const messages = [
-                ...conversationHistory,
-                { role: 'user', content: `${context}\n\n${userMessage}` }
-            ];
+            // Build messages for API with system instruction embedded in first message
+            let messages = [];
+            
+            if (conversationHistory.length === 0) {
+                // First message - include system instruction
+                messages = [
+                    {
+                        role: 'user',
+                        parts: [{ text: `${SYSTEM_INSTRUCTION}\n\n${context}\n\n${userMessage}` }]
+                    }
+                ];
+            } else {
+                // Subsequent messages - just add user message
+                messages = [
+                    ...conversationHistory.map(msg => ({
+                        role: msg.role === 'user' ? 'user' : 'model',
+                        parts: [{ text: msg.content }]
+                    })),
+                    {
+                        role: 'user',
+                        parts: [{ text: `${context}\n\n${userMessage}` }]
+                    }
+                ];
+            }
 
             const requestBody = {
-                system: SYSTEM_INSTRUCTION,
-                contents: messages.map(msg => ({
-                    role: msg.role === 'user' ? 'user' : 'model',
-                    parts: [{ text: msg.content }]
-                }))
+                contents: messages
             };
 
             const response = await fetch(
